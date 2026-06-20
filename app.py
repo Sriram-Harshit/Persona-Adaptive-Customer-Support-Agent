@@ -1,4 +1,6 @@
 import json
+import os
+
 import streamlit as st
 import chromadb
 from sentence_transformers import SentenceTransformer
@@ -7,6 +9,12 @@ from src.persona_detector import detect_persona
 from src.response_generator import generate_response
 from src.escalation import should_escalate
 from src.handoff import generate_handoff
+
+if not os.path.exists("chroma_db"):
+    try:
+        import src.rag_pipeline
+    except Exception as e:
+        st.error(f"Failed to build knowledge base: {e}")
 
 
 @st.cache_resource
@@ -47,7 +55,7 @@ st.title("🤖 Persona-Adaptive Customer Support Agent")
 
 with st.sidebar:
     st.header("System Information")
-    st.write("LLM: Gemini 2.5 Flash")
+    st.write("Persona Detection: Rule-Based")
     st.write("Vector Database: ChromaDB")
     st.write("Embedding Model: all-MiniLM-L6-v2")
 
@@ -64,7 +72,6 @@ if st.button("Submit"):
     try:
 
         persona_data = detect_persona(query)
-
         persona = persona_data["persona"]
 
         docs, sources = retrieve_documents(query)
@@ -77,6 +84,9 @@ if st.button("Submit"):
 
             st.subheader("Response")
             st.error("Your request requires review by a human support representative.")
+
+            with st.expander("Human Handoff Summary"):
+                st.json(json.loads(handoff))
 
         else:
 
