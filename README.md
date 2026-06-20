@@ -2,15 +2,15 @@
 
 ## Overview
 
-Persona-Adaptive Customer Support Agent is an AI-powered customer support system that combines Retrieval-Augmented Generation (RAG), persona detection, and escalation handling to deliver personalized support responses.
+Persona-Adaptive Customer Support Agent is a customer support system that combines Retrieval-Augmented Generation (RAG), semantic search, persona detection, and escalation handling to deliver personalized support responses.
 
-The system identifies the type of user, retrieves relevant information from a knowledge base, generates context-aware responses, and escalates sensitive cases to human support when necessary.
+The system identifies the type of user, retrieves relevant information from a knowledge base, generates persona-specific responses, and escalates sensitive cases to human support when necessary.
 
 ---
 
 ## Features
 
-- Persona Detection using Gemini
+- Rule-Based Persona Detection
 - Retrieval-Augmented Generation (RAG)
 - ChromaDB Vector Database
 - Semantic Search using Sentence Transformers
@@ -46,11 +46,11 @@ Persona Detection
     ↓
 Document Retrieval (ChromaDB)
     ↓
+Response Generation
+    ↓
 Escalation Check
     ↓
-Adaptive Response Generation
-    ↓
-Human Handoff (if required)
+Human Handoff
 ```
 
 ---
@@ -87,7 +87,7 @@ persona-support-agent/
 │
 ├── requirements.txt
 ├── README.md
-└── .env
+└── .gitignore
 ```
 
 ---
@@ -100,11 +100,7 @@ persona-support-agent/
 
 ### Backend
 
-- Python
-
-### Large Language Model
-
-- Gemini 2.5 Flash
+- Python 3.11+
 
 ### Vector Database
 
@@ -119,6 +115,140 @@ persona-support-agent/
 - Sentence Transformers
 - LangChain Text Splitters
 - Python Dotenv
+
+### Response Engine
+
+- Rule-Based Adaptive Response Generation
+
+---
+
+## Tech Stack
+
+| Component              | Technology               |
+| ---------------------- | ------------------------ |
+| Frontend               | Streamlit                |
+| Backend                | Python                   |
+| Vector Database        | ChromaDB                 |
+| Embeddings             | all-MiniLM-L6-v2         |
+| Embedding Framework    | Sentence Transformers    |
+| Chunking               | LangChain Text Splitters |
+| Environment Management | Python Dotenv            |
+
+---
+
+## Architecture Diagram
+
+```text
+User Query
+    ↓
+Persona Detection
+    ↓
+Document Retrieval
+    ↓
+Response Generation
+    ↓
+Escalation Check
+    ↓
+Human Handoff
+```
+
+---
+
+## Persona Detection Strategy
+
+The system uses a rule-based classification approach.
+
+### Technical Expert
+
+Detected when the query contains technical keywords such as:
+
+- API
+- Authentication
+- Token
+- Endpoint
+- Logs
+- Error
+- Configuration
+
+### Frustrated User
+
+Detected when the query contains emotional or frustration indicators such as:
+
+- Nothing works
+- Frustrated
+- Angry
+- Urgent
+- Cannot
+- Can't
+
+### Business Executive
+
+Used as the default persona when the query does not match technical or frustration indicators.
+
+The detected persona influences the style and detail level of the generated response.
+
+---
+
+## RAG Pipeline Design
+
+### Chunking Strategy
+
+Knowledge base documents are split using RecursiveCharacterTextSplitter.
+
+Configuration:
+
+- Chunk Size: 400
+- Chunk Overlap: 50
+
+This improves retrieval accuracy while preserving context.
+
+### Embedding Model
+
+The system uses:
+
+```text
+all-MiniLM-L6-v2
+```
+
+to convert document chunks into dense vector embeddings.
+
+### Vector Database Choice
+
+ChromaDB was selected because it is:
+
+- Lightweight
+- Open Source
+- Easy to Deploy
+- Fast for Semantic Search
+
+### Retrieval Strategy
+
+The user query is converted into an embedding.
+
+ChromaDB performs similarity search and returns the most relevant document chunks.
+
+The retrieved chunks are then used to generate the final response.
+
+---
+
+## Escalation Logic
+
+The system escalates sensitive requests to a human agent.
+
+### Escalation Triggers
+
+- Refund requests
+- Billing disputes
+- Payment issues
+- Legal concerns
+- Account deletion requests
+- Missing knowledge base information
+
+### Confidence Thresholds
+
+The current implementation uses rule-based escalation rather than numerical confidence scores.
+
+Escalation occurs whenever predefined sensitive keywords are detected or no relevant documents are retrieved.
 
 ---
 
@@ -161,11 +291,9 @@ pip install -r requirements.txt
 
 ## Environment Variables
 
-Create a `.env` file:
+No environment variables are required.
 
-```env
-GEMINI_API_KEY=your_gemini_api_key
-```
+The application runs completely locally without external API dependencies.
 
 ---
 
@@ -202,26 +330,58 @@ http://localhost:8501
 
 ### Technical Expert
 
-```text
 Can you explain the API authentication failure and provide troubleshooting details?
-```
 
 ### Frustrated User
 
-```text
 I've tried everything and nothing works. I cannot reset my password.
-```
 
 ### Business Executive
 
-```text
 How will this outage impact operations and when will it be resolved?
-```
+
+### Login Issue
+
+I am unable to log into my account after several attempts.
+
+### Subscription Question
+
+Can I upgrade my subscription plan immediately?
 
 ### Escalation Scenario
 
-```text
 I want a refund for duplicate charges.
-```
 
 ---
+
+## Known Limitations
+
+- Persona detection is rule-based and may not capture complex user intent.
+- No multi-turn conversation memory.
+- Limited to the information available in the knowledge base.
+- Human handoff is simulated and not connected to a real ticketing system.
+- Responses are generated from retrieved knowledge base content only.
+
+---
+
+## Future Improvements
+
+- LLM-based persona classification
+- Multi-turn conversation memory
+- Real ticketing system integration
+- User authentication
+- Analytics dashboard
+- Additional customer personas
+- Confidence-based escalation scoring
+
+---
+
+## Repository
+
+GitHub: https://github.com/Sriram-Harshit/Persona-Adaptive-Customer-Support-Agent
+
+---
+
+## Author
+
+Sri Ram Harshit
