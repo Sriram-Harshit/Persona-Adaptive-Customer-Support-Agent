@@ -1,40 +1,45 @@
-import os
-import json
-from dotenv import load_dotenv
-from google import genai
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-
 def detect_persona(message):
 
-    prompt = f"""
-Classify the customer message into exactly one persona.
+    text = message.lower()
 
-Personas:
-1. Technical Expert
-2. Frustrated User
-3. Business Executive
+    technical_keywords = [
+        "api",
+        "authentication",
+        "endpoint",
+        "token",
+        "error",
+        "logs",
+        "configuration",
+        "server",
+    ]
 
-Return ONLY valid JSON:
+    frustrated_keywords = [
+        "frustrated",
+        "angry",
+        "nothing works",
+        "terrible",
+        "urgent",
+        "annoying",
+        "cannot",
+        "can't",
+    ]
 
-{{
-    "persona": "",
-    "confidence": "",
-    "reasoning": ""
-}}
+    if any(word in text for word in technical_keywords):
+        return {
+            "persona": "Technical Expert",
+            "confidence": "High",
+            "reasoning": "Technical terminology detected.",
+        }
 
-Message:
-{message}
-"""
+    if any(word in text for word in frustrated_keywords):
+        return {
+            "persona": "Frustrated User",
+            "confidence": "High",
+            "reasoning": "Emotional language detected.",
+        }
 
-    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
-
-    text = response.text.strip()
-    text = text.replace("```json", "")
-    text = text.replace("```", "")
-    text = text.strip()
-
-    return json.loads(text)
+    return {
+        "persona": "Business Executive",
+        "confidence": "Medium",
+        "reasoning": "General business-oriented query.",
+    }

@@ -1,64 +1,36 @@
-import os
-from dotenv import load_dotenv
-from google import genai
-
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-
 def generate_response(query, persona, retrieved_docs):
+
+    if not retrieved_docs:
+        return "No relevant information was found in the knowledge base."
 
     context = "\n\n".join(retrieved_docs)
 
-    styles = {
-        "Technical Expert": """
-You are a senior technical support engineer.
+    if persona == "Technical Expert":
+        return f"""
+Technical Support Response
 
-Provide:
-- Technical explanations
-- Root cause analysis
-- Troubleshooting steps
+Based on the available documentation:
 
-Use only the supplied context.
-""",
-        "Frustrated User": """
-You are an empathetic support specialist.
-
-Provide:
-- Understanding and reassurance
-- Clear action steps
-- Simple explanations
-
-Use only the supplied context.
-""",
-        "Business Executive": """
-You are a business support representative.
-
-Provide:
-- Concise answers
-- Business impact
-- Resolution guidance
-
-Use only the supplied context.
-""",
-    }
-
-    prompt = f"""
-{styles.get(persona, styles["Business Executive"])}
-
-CONTEXT:
 {context}
 
-QUESTION:
-{query}
+Please review the troubleshooting steps above.
+""".strip()
 
-Rules:
-- Answer only from the context.
-- Do not invent information.
-- If information is unavailable, clearly say so.
-"""
+    if persona == "Frustrated User":
+        return f"""
+I understand this issue can be frustrating.
 
-    response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+Please follow these steps:
 
-    return response.text
+{context}
+
+If the issue continues, please contact support.
+""".strip()
+
+    return f"""
+Business Summary
+
+{context}
+
+Please review the information above for operational impact and resolution guidance.
+""".strip()
